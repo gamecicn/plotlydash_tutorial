@@ -1,0 +1,19 @@
+branch-defaults:
+  interactive_excel_dashboard:
+    environment: plotdash-dev3
+deploy:
+  artifact: deploy.zip
+global:
+  application_name: interactive_excel_dashboard
+  branch: null
+  default_ec2_keyname: null
+  default_platform: Python 3.6 running on 64bit Amazon Linux
+  default_region: us-east-1
+  include_git_submodules: null
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: null
+  repository: null
+  sc: git
+  workspace_type: Application
