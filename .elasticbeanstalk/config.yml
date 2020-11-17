@@ -1,0 +1,26 @@
+branch-defaults:
+  default:
+    environment: polydash-env
+    group_suffix: null
+  main:
+    environment: polydash-env
+  interactive_excel_dashboard:
+    environment: polydash-env2
+environment-defaults:
+  polydash-env:
+    branch: null
+    repository: null
+global:
+  application_name: plotly_dash
+  branch: null
+  default_ec2_keyname: null
+  default_platform: Python 3.7 running on 64bit Amazon Linux 2
+  default_region: us-east-1
+  include_git_submodules: null
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: null
+  repository: null
+  sc: git
+  workspace_type: Application
