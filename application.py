@@ -1,5 +1,7 @@
 import dash
 import plotly.express as px
+
+import numpy as np
 import pandas as pd
 
 import dash_html_components as html
@@ -9,49 +11,40 @@ from dash.dependencies import Output, Input
 
 # Data Exploration
 #----------------------------------------
-df = pd.read_csv("./data/vgsales.csv")
+df = pd.read_csv("./data/MPVDataset.csv")
 
-#  print(df[:5])
-#  print(df.Genre.nunique())
-#  print(df.Genre.unique())
+df["Victim's age"] = pd.to_numeric(df["Victim's age"], errors='coerce').fillna(0).astype(np.int64)
+df.rename(columns={'Fleeing (Source: WaPo)' : 'Fleeing'}, inplace=True )
 
-#fig_pie = px.pie(data_frame=df, names="Genre", values="Japan Sales")
-#fig_pie.show()
 
-#fig_bar = px.bar(data_frame=df, x="Genre", y="Japan Sales")
-#fig_bar.show()
+df = df[df["State"].isin(['NY', 'CA', 'TX'])]
+df = df[df["Victim's race"].isin(["White", "Black", "Hispanic", "Asian"])]
 
-# fig_hist = px.histogram(data_frame=df, x="Year", y="Japan Sales")
-# fig_hist.show()
+fig = px.sunburst(
+    data_frame=df,
+    path=["Unarmed", "State", "Victim's race"],
+    color="Unarmed",
+    color_discrete_sequence=px.colors.qualitative.Pastel,
+    # maxdepth=-1,                        # set the sectors rendered. -1 will render all levels in the hierarchy
+    # color="Victim's age",
+    # color_continuous_scale=px.colors.sequential.BuGn,
+    # range_color=[10,100],
 
-# Interactive Graphing with Dash
-app = dash.Dash(__name__)
-application = app.server
-
-app.layout = html.Div([
-
-    html.H1("Graph Analysis with Charming Data"),
-
-    dcc.Dropdown(id='genre-choice',
-                 options=[{'label': x, 'value': x}
-                          for x in sorted(df.Genre.unique())],
-                 value='Sports'),
-
-    dcc.Graph(id="my-graph", figure=px.histogram(data_frame=df,
-                                                 x='Year',
-                                                 y='Japan Sales'))
-
-])
-
-@app.callback(
-    Output(component_id='my-graph', component_property='figure'),
-    Input(component_id='genre-choice', component_property='value')
+    # branchvalues="total",               # or 'remainder'
+    # hover_name="Unarmed",
+    # # hover_data={'Unarmed': False},    # remove column name from tooltip  (Plotly version >= 4.8.0)
+    # title="7-year Breakdown of Deaths by Police",
+    # template='ggplot2',               # 'ggplot2', 'seaborn', 'simple_white', 'plotly',
+    #                                   # 'plotly_white', 'plotly_dark', 'presentation',
+    #                                   # 'xgridoff', 'ygridoff', 'gridon', 'none'
 )
-def interactive_graphing(value_genre):
-    print(value_genre)
-    dff = df[df.Genre == value_genre]
-    fig = px.bar(data_frame=dff, x="Year", y="Japan Sales")
-    return fig
+
+fig.update_traces(textinfo='label+percent entry')
+fig.update_layout(margin=dict(t=0, l=0, r=0, b=0))
+
+fig.show()
+
+
 
 
 '''
@@ -67,6 +60,6 @@ app.title='Interactive Excel Dashboard'
 '''
 
 ########### Run the app
-if __name__ == '__main__':
-    application.run(debug=True, port=8080)
+#if __name__ == '__main__':
+#    application.run(debug=True, port=8080)
 
