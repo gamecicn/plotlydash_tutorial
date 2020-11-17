@@ -26,9 +26,16 @@ eb deploy
 # Create Python virual env
 
 ```
+# create vritual env 
 virtualenv env
 
+# activate (windows)
+activate_env.bat
+
+# install dash package
 pip install dash
+
+
 ```
 
 
