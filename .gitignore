@@ -7,5 +7,6 @@
 
 # Env
 .env
+.idea
 requirements.txt
 

@@ -1,65 +1,62 @@
 import dash
-import plotly.express as px
-
-import numpy as np
-import pandas as pd
-
-import dash_html_components as html
 import dash_core_components as dcc
-from dash.dependencies import Output, Input
+import dash_html_components as html
+from   dash.dependencies import Input, Output, State
+
+import requests
+import json
 
 
-# Data Exploration
-#----------------------------------------
-df = pd.read_csv("./data/MPVDataset.csv")
-
-df["Victim's age"] = pd.to_numeric(df["Victim's age"], errors='coerce').fillna(0).astype(np.int64)
-df.rename(columns={'Fleeing (Source: WaPo)' : 'Fleeing'}, inplace=True )
-
-
-df = df[df["State"].isin(['NY', 'CA', 'TX'])]
-df = df[df["Victim's race"].isin(["White", "Black", "Hispanic", "Asian"])]
-
-fig = px.sunburst(
-    data_frame=df,
-    path=["Unarmed", "State", "Victim's race"],
-    color="Unarmed",
-    color_discrete_sequence=px.colors.qualitative.Pastel,
-    # maxdepth=-1,                        # set the sectors rendered. -1 will render all levels in the hierarchy
-    # color="Victim's age",
-    # color_continuous_scale=px.colors.sequential.BuGn,
-    # range_color=[10,100],
-
-    # branchvalues="total",               # or 'remainder'
-    # hover_name="Unarmed",
-    # # hover_data={'Unarmed': False},    # remove column name from tooltip  (Plotly version >= 4.8.0)
-    # title="7-year Breakdown of Deaths by Police",
-    # template='ggplot2',               # 'ggplot2', 'seaborn', 'simple_white', 'plotly',
-    #                                   # 'plotly_white', 'plotly_dark', 'presentation',
-    #                                   # 'xgridoff', 'ygridoff', 'gridon', 'none'
-)
-
-fig.update_traces(textinfo='label+percent entry')
-fig.update_layout(margin=dict(t=0, l=0, r=0, b=0))
-
-fig.show()
-
-
-
-
-'''
 ########### Initiate the app
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+
 application = app.server
-app.title='Interactive Excel Dashboard'
 
 
+app.layout = html.Div([
+    html.H6("Emotional analysis test"),
+    html.Div(["Input: ",
+              dcc.Textarea(id='cus_input', value="I'm happy", style={'width': '100%'})]),
+    html.Br(),
+    html.Div(id='my-output'),
+    html.Br(),
+    html.Button('Analysis', id='button_1'),
 
-########### Set up the layout
-'''
+])
 
-########### Run the app
-#if __name__ == '__main__':
-#    application.run(debug=True, port=8080)
+BASE_URL = "http://23.22.92.236:5000"
+
+def test_analysis_emotion(text):
+    data = {
+        'text': text,
+    }
+
+    try:
+        header_dict = {"Content-Type": "application/json"}
+        url = '{}/api/emotion'.format(BASE_URL)
+        res = requests.post(url=url, data=json.dumps(data), headers=header_dict)
+
+        if res.status_code != 200:
+            return "Error occurs: {}".format(res.text)
+
+        return json.loads(res.text)['result']
+    except:
+        return "Error occurs"
+
+
+@app.callback(
+    Output(component_id='my-output', component_property='children'),
+    Input(component_id="button_1", component_property="n_clicks"),
+    State(component_id='cus_input', component_property='value'),
+
+    prevent_initial_call=True
+)
+def update_output_div(n_clicks, input):
+    return 'Emotion: {}'.format(test_analysis_emotion(input))
+
+
+if __name__ == '__main__':
+    app.run_server(debug=False)
 
